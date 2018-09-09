@@ -1,29 +1,63 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
+    <mt-header title="미.경.포.스">
+      <mt-button slot="left" @click="$router.back()" icon="back"></mt-button>
+      <mt-button slot="right" @click="refresh" icon="more"></mt-button>
+    </mt-header>
     <router-view/>
   </div>
 </template>
+<style lang="scss" src="./style.scss"></style>
+<script lang="ts">
+  import { Component, Vue } from 'vue-property-decorator';
+  import { Action, State } from 'vuex-class';
+  import { ActionMethod } from 'vuex';
+  import { Indicator, MessageBox } from 'mint-ui';
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
+  @Component({
+    components: {
+    },
+  })
+  export default class App extends Vue {
+    @Action('loadProductGroups') loadProductGroups: ActionMethod
+    @Action('loadTables') loadTables: ActionMethod
+    @Action('loadUserName') loadUserName: ActionMethod
+    @Action('setUserName') setUserName: ActionMethod
+    @State('userName') userName: string
+    async created () {
+      await this.refresh()
+    }
+   async refresh () {
+      try {
+        Indicator.open();
+        await Promise.all([
+          this.loadProductGroups(),
+          this.loadTables(),
+          this.loadUserName()
+        ]);
+        if (!this.userName) {
+          this.$router.push({ name: 'home' })
+          this.showUserNamePrompt()
+        }
+      } finally {
+        Indicator.close();
+      }
+
+    }
+    showUserNamePrompt () {
+      MessageBox({
+        $type: 'prompt',
+        title: '',
+        message: '당신의 이름을 입력해주세요.',
+        showCancelButton: false,
+        showInput: true,
+        confirmButtonText: '확인'
+      }).then(({ value, action }) => {
+        if (!value) {
+          return this.showUserNamePrompt()
+        }
+        this.setUserName(value)
+      });
     }
   }
-}
-</style>
+</script>

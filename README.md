@@ -1,4 +1,4 @@
-# mikyung-pos
+# 미경 포쓰!
 
 ## Project setup
 ```
