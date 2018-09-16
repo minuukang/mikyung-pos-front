@@ -1,0 +1,3 @@
+[submodule "dist"]
+	path = dist
+	url = https://mikyeong@mkpos.scm.azurewebsites.net:443/mkpos.git
