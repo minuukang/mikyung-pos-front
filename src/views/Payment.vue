@@ -91,7 +91,7 @@
     @Action('paymentOrder')
     protected paymentOrder: ActionMethod;
     protected productEa: ProductEa[] = [];
-    public receiveAmount: number | null = null
+    public receiveAmount: number | null = null;
     get orderInfo() {
       return this.orderInfos.find((info) => info.orderInfoId === this.orderInfoId);
     }

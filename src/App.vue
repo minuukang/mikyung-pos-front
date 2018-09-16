@@ -62,8 +62,8 @@
         Indicator.close();
       }
     }
-    protected async showUserNamePrompt() {
-      const { value } = await MessageBox({
+    protected async showUserNamePrompt(): Promise<void> {
+      const { value }: { value: string } = await MessageBox({
         $type: 'prompt',
         title: '',
         message: '당신의 이름을 입력해주세요.',
