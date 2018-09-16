@@ -3,8 +3,9 @@ import Vuex from 'vuex';
 import { Product, ProductGroup, Table } from '@/store/types';
 import loadProducts from '@/api/loadProducts';
 import loadTables from '@/api/loadTables';
-import orderApi from '@/api/order';
-import users from '@/config/users.json'
+import orderApi, { default as order, OrderChangeStatusPayload, OrderPaymentPayload } from '@/api/order'
+import users from '@/config/users.json';
+import api from '@/api'
 
 Vue.use(Vuex);
 
@@ -14,6 +15,10 @@ interface RootState {
   userName: string;
 }
 
+function roleMatch (role: string, ...matchRole: string[]): boolean {
+  return role === '*' || (!!~matchRole.indexOf(role));
+}
+
 export default new Vuex.Store<RootState>({
   state: {
     productGroups: [],
@@ -21,6 +26,9 @@ export default new Vuex.Store<RootState>({
     userName: '',
   },
   getters: {
+    userRole(state) {
+      return state.userName && (users.find((user) => user.name === state.userName) as any).role
+    },
     products(state): Product[] {
       return state.productGroups.reduce<Product[]>((result, { products }) => {
         return result.concat(products);
@@ -72,22 +80,48 @@ export default new Vuex.Store<RootState>({
     },
     loadTables(context) {
       return loadTables().then((tables) => {
-        // tables.forEach(table => context.commit('addTable', table))
         context.commit('replaceTables', tables);
       });
     },
-    paymentOrder(context, payload) {
+    async paymentOrder(context, payload) {
+      if (!roleMatch(context.getters.userRole, '캐셔', '서빙')) {
+        throw new Error('권한이 없습니다!');
+      }
       return orderApi.paymentOrder({
         ...payload,
         orderOwnerName: context.state.userName,
       });
     },
+    exitOrder(context, orderId: number) {
+      if (!roleMatch(context.getters.userRole, '캐셔', '서빙')) {
+        throw new Error('권한이 없습니다!');
+      }
+      return orderApi.exitOrder(orderId);
+    },
+    changeStatus(context, { orderId, productId }: OrderChangeStatusPayload) {
+      if (!roleMatch(context.getters.userRole, '요리')) {
+        throw new Error('권한이 없습니다!');
+      }
+      return orderApi.changeStatus({ orderId, productId });
+    },
+    completePayment(context, orderId: number) {
+      if (!roleMatch(context.getters.userRole, '캐셔')) {
+        throw new Error('권한이 없습니다!');
+      }
+      return orderApi.completePayment(orderId);
+    },
+    deleteOrder(context, orderId: number) {
+      if (!roleMatch(context.getters.userRole, '캐셔', '서빙')) {
+        throw new Error('권한이 없습니다!');
+      }
+      return orderApi.deleteOrder(orderId);
+    },
     loadUserName(context) {
       const userName = localStorage.getItem('posUserName') || '';
       return userName && context.dispatch('setUserName', userName);
     },
-    setUserName(context, payload: string) {
-      if (users.some(user => user.name === payload)) {
+    async setUserName(context, payload: string) {
+      if (users.some((user) => user.name === payload)) {
         localStorage.setItem('posUserName', payload);
         context.commit('setUserName', payload);
       } else {

@@ -11,13 +11,19 @@
           <p :class="$style.cardRight" v-if="table.infoBeginDate">종료시간 {{ remainDate(table.infoBeginDate) }}</p>
         </header>
         <div :class="$style.cardContainer">
-          <mt-cell v-for="order in table.orders" :title="`${order.orderProducts.length}건 주문`" :label="`총합 : ${order.totalPrice}원`">
+          <mt-cell
+            :class="$style.cardItem"
+            v-for="order in table.orders"
+            :title="`${order.orderProducts.length}건 주문`"
+            :label="`총합 : ${$options.filters.numberFormat(order.totalPrice)}원`"
+            @click.native="showStatusDetail(order)"
+          >
             <template v-if="order.orderPaymentYn">
               결제완료
             </template>
             <template v-else>
-              <mt-button :class="$style.button" size="small" @click="doPayment(order)">결제요청</mt-button>
-              <mt-button :class="$style.button" size="small" type="danger" @click="doDelete(order)">삭제</mt-button>
+              <mt-button :class="$style.button" size="small" @click.stop="doPayment(order)">결제요청</mt-button>
+              <mt-button :class="$style.button" size="small" type="danger" @click.stop="doDelete(order)">삭제</mt-button>
             </template>
           </mt-cell>
           <!--<mt-cell title="1건 주문" label="총합 : 1500원">결제완료</mt-cell>-->
@@ -25,7 +31,7 @@
         <footer :class="$style.cardFooter">
           <template v-if="table.useYn">
             <mt-button :class="$style.button" @click="$router.push({ name: 'payment', params: { orderInfoId: table.orderInfoId } })" type="primary">추가주문</mt-button>
-            <mt-button :class="$style.button" @click="exitOrder(table)" type="danger">종료</mt-button>
+            <mt-button :class="$style.button" @click="doExitOrder(table)" type="danger">종료</mt-button>
           </template>
           <template v-else>
             <mt-button :class="$style.button" @click="$router.push({ name: 'payment', params: { orderInfoId: table.orderInfoId } })" type="primary">주문하기</mt-button>
@@ -57,11 +63,17 @@
     & ~ & {
       margin-top: 15px;
     }
+    &Item {
+      min-height: 60px !important;
+    }
     &Header {
       padding-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
+    }
+    &Right {
+      color: #aaaaaa;
     }
     &Title {
       font-size: 16px;
@@ -83,11 +95,12 @@
 </style>
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
-  import { Getter } from 'vuex-class';
+  import { Getter, Action } from 'vuex-class';
+  import { ActionMethod } from 'vuex';
   import { Order, Table } from '../store/types';
   import { Indicator, MessageBox } from 'mint-ui';
-  import api from '@/api/order';
-  import moment from 'moment'
+  import moment from 'moment';
+  import { confirmMessage } from '../helper/confirm';
 
   @Component({
     components: {
@@ -98,65 +111,26 @@
     protected tables: Table[];
     @Getter('unusingTakeoutId')
     protected unusingTakeoutId: number | null;
-    public remainDate (date: number) {
+    @Action('completePayment') protected completePayment: ActionMethod;
+    @Action('deleteOrder') protected deleteOrder: ActionMethod;
+    @Action('exitOrder') protected exitOrder: ActionMethod;
+    public remainDate(date: number) {
       return date && moment(date).add(90, 'm').format('H:mm');
     }
+    @confirmMessage('주문결제')
     protected async doPayment(order: Order) {
-      await MessageBox({
-        $type: 'confirm',
-        title: '안내',
-        message: '주문건 결제를 요청하시겠습니까?',
-        showCancelButton: true,
-        confirmButtonText: '확인',
-        cancelButtonText: '취소',
-      });
-      Indicator.open('결제중...');
-      await api.completePayment(order.orderId);
-      Indicator.close();
-      await MessageBox({
-        title: '안내',
-        message: '결제가 완료되었습니다!',
-        confirmButtonText: '확인',
-      });
-      this.$root.$emit('refresh');
+      await this.completePayment(order.orderId);
     }
+    @confirmMessage('주문삭제')
     protected async doDelete(order: Order) {
-      await MessageBox({
-        $type: 'confirm',
-        title: '안내',
-        message: '주문건을 삭제하시겠습니까?',
-        showCancelButton: true,
-        confirmButtonText: '확인',
-        cancelButtonText: '취소',
-      });
-      Indicator.open('삭제중...');
-      await api.deleteOrder(order.orderId);
-      Indicator.close();
-      await MessageBox({
-        title: '안내',
-        message: '주문이 삭제되었습니다!',
-        confirmButtonText: '확인',
-      });
-      this.$root.$emit('refresh');
+      await this.deleteOrder(order.orderId);
     }
-    protected async exitOrder(table: Table) {
-      await MessageBox({
-        $type: 'confirm',
-        title: '안내',
-        message: '정말로 테이블 이용을 종료하시겠습니까?',
-        showCancelButton: true,
-        confirmButtonText: '확인',
-        cancelButtonText: '취소',
-      });
-      Indicator.open('종료중...');
-      await api.exitOrder(table.orderInfoId);
-      Indicator.close();
-      await MessageBox({
-        title: '안내',
-        message: '테이블 이용이 종료되었습니다!',
-        confirmButtonText: '확인',
-      });
-      this.$root.$emit('refresh');
+    @confirmMessage('테이블 이용 종료')
+    protected async doExitOrder(table: Table) {
+      await this.exitOrder(table.orderInfoId);
+    }
+    protected showStatusDetail(order: Order) {
+      this.$router.push({ name: 'status', params: { orderId: order.orderId } });
     }
     get tableInfos() {
       return this.tables.map((table) => {

@@ -10,8 +10,8 @@ import numeral from 'numeral';
 
 Vue.use(Mint);
 Vue.component('v-icon', Icon);
-Vue.filter('numberFormat', function(value: number) {
-  return numeral(value).value();
+Vue.filter('numberFormat', (value: number) => {
+  return numeral(value).format('0,0');
 });
 
 Vue.config.productionTip = false;

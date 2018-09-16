@@ -44,13 +44,4 @@ export default {
   deleteOrder(orderId: number) {
     return api.delete(`/orders/${orderId}`);
   },
-  detail(orderId: number): Promise<Order> {
-    return api.get(`/orders/${orderId}`).then(({ data }) => data);
-  },
-  updateOrder({ orderId, products }: OrderUpdatePayload) {
-    return api.put(`/orders/${orderId}`, { products });
-  },
-  complete(orderId: number) {
-    return api.put(`/orders/${orderId}/orderComplete`);
-  },
 };

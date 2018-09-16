@@ -1,5 +1,5 @@
 <template>
-  <mt-cell :class="$style.container" :title="model.productName" :label="`${model.salesAmount}원`">
+  <mt-cell :class="$style.container" :title="model.productName" :label="`${$options.filters.numberFormat(model.salesAmount)}원`">
     <div :class="$style.range">
       <button type="button" :class="$style.rangeButton" @click="down"><v-icon name="minus"></v-icon></button>
       <input type="number" :class="$style.rangeInput" v-model.number="value">

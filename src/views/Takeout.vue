@@ -57,10 +57,11 @@
 </style>
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
-  import { Getter } from 'vuex-class';
+  import { Getter, Action } from 'vuex-class';
+  import { ActionMethod } from 'vuex';
   import { Order, Table } from '../store/types';
   import { MessageBox, Indicator } from 'mint-ui';
-  import api from '@/api/order';
+  import { confirmMessage } from '../helper/confirm';
 
   @Component({
     components: {
@@ -71,67 +72,25 @@
     protected unusingTakeoutId: number | null;
     @Getter('usingTakeouts')
     protected takeouts: Table[];
+    @Action('completePayment') protected completePayment: ActionMethod;
+    @Action('exitOrder') protected exitOrder: ActionMethod;
+    @Action('deleteOrder') protected deleteOrder: ActionMethod;
     get takeoutsAsc(): Table[] {
       return this.takeouts.slice().sort((info1, info2) => {
-        return info1.infoBeginDate - info2.infoBeginDate
-      })
+        return info1.infoBeginDate - info2.infoBeginDate;
+      });
     }
+    @confirmMessage('결제')
     protected async doPayment(order: Order) {
-      await MessageBox({
-        $type: 'confirm',
-        title: '안내',
-        message: '결제를 요청하시겠습니까?',
-        showCancelButton: true,
-        confirmButtonText: '확인',
-        cancelButtonText: '취소',
-      });
-      Indicator.open('결제중...');
-      await api.completePayment(order.orderId);
-      Indicator.close();
-      await MessageBox({
-        title: '안내',
-        message: '결제가 완료되었습니다!',
-        confirmButtonText: '확인',
-      });
-      this.$root.$emit('refresh');
+      await this.completePayment(order.orderId);
     }
+    @confirmMessage('주문종료')
     protected async doSuccess(order: Table) {
-      await MessageBox({
-        $type: 'confirm',
-        title: '안내',
-        message: '주문을 종료하시겠습니까?',
-        showCancelButton: true,
-        confirmButtonText: '확인',
-        cancelButtonText: '취소',
-      });
-      Indicator.open('결제중...');
-      await api.exitOrder(order.orderInfoId);
-      Indicator.close();
-      await MessageBox({
-        title: '안내',
-        message: '주문이 종료되었습니다!',
-        confirmButtonText: '확인',
-      });
-      this.$root.$emit('refresh');
+      await this.exitOrder(order.orderInfoId);
     }
+    @confirmMessage('주문취소')
     protected async doCancel(order: Order) {
-      await MessageBox({
-        $type: 'confirm',
-        title: '안내',
-        message: '주문을 취소하시겠습니까?',
-        showCancelButton: true,
-        confirmButtonText: '확인',
-        cancelButtonText: '취소',
-      });
-      Indicator.open('취소중...');
-      await api.deleteOrder(order.orderId);
-      Indicator.close();
-      await MessageBox({
-        title: '안내',
-        message: '주문이 취소되었습니다!',
-        confirmButtonText: '확인',
-      });
-      this.$root.$emit('refresh');
+      await this.deleteOrder(order.orderId);
     }
   }
 </script>

@@ -4,7 +4,7 @@
       <div class="mint-header-button is-left">
         <mt-button slot="left" @click="$router.back()" icon="back"></mt-button>
       </div>
-      <h1 class="mint-header-title"><router-link :to="{ name: 'home' }">미.경.포.스</router-link></h1>
+      <h1 class="mint-header-title" :class="$style.title"><router-link :to="{ name: 'home' }">미.경.포.스</router-link></h1>
       <div class="mint-header-button is-right">
         <v-icon name="sync" @click.native="refresh"></v-icon>
       </div>
@@ -20,6 +20,10 @@
     height: 100%;
     overflow: hidden;
   }
+  .title {
+    font-weight: bold;
+    font-size: 18px;
+  }
   .main {
     flex: 1;
     overflow-y: scroll;
@@ -31,6 +35,8 @@
   import { Action, State } from 'vuex-class';
   import { ActionMethod } from 'vuex';
   import { Indicator, MessageBox } from 'mint-ui';
+
+  const REFRESH_TIME = 6500;
 
   @Component({
     components: {
@@ -47,25 +53,25 @@
     protected setUserName: ActionMethod;
     @State('userName')
     protected userName: string;
-    private refreshInterval: number = 0;
+    private refreshInterval: any = 0;
     protected async created() {
       this.$root.$on('refresh', this.refresh);
-      clearInterval(this.refreshInterval);
-      this.refreshInterval = setInterval(() => this.refresh(false), 6000);
-      await this.refresh();
+      await Promise.all([
+        this.loadProductGroups(),
+        this.loadUserName(),
+      ]);
+      if (!this.userName) {
+        this.$router.push({ name: 'home' });
+        await this.showUserNamePrompt();
+      }
+      this.refresh();
     }
     protected async refresh(showIndicator = true) {
       try {
+        clearTimeout(this.refreshInterval);
         showIndicator && Indicator.open();
-        await Promise.all([
-          this.loadProductGroups(),
-          this.loadTables(),
-          this.loadUserName(),
-        ]);
-        if (!this.userName) {
-          this.$router.push({ name: 'home' });
-          this.showUserNamePrompt();
-        }
+        await this.loadTables();
+        this.refreshInterval = setTimeout(() => this.refresh(false), REFRESH_TIME);
       } finally {
         showIndicator && Indicator.close();
       }
