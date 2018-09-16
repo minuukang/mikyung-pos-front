@@ -14,12 +14,6 @@
   import { Order, Table } from '../store/types';
   import OrderCard from '../components/OrderCard.vue';
 
-  function getOrderIsSuccess(order: Order) {
-    const cookingProducts = order.orderProducts.filter((orderItem) => !orderItem.product.productAutoCookingCompleteYn);
-    const cookingSuccessProducts = cookingProducts.filter((orderItem) => orderItem.orderProductStatus === 'COOK_END');
-    return cookingProducts.length === cookingSuccessProducts.length;
-  }
-
   @Component({
     components: {
       OrderCard,
@@ -41,9 +35,7 @@
           };
         }));
       }, []).sort((order1: Order, order2: Order) => {
-        const orderEnd1 = +getOrderIsSuccess(order1);
-        const orderEnd2 = +getOrderIsSuccess(order2);
-        return (orderEnd1 - orderEnd2) || (order2.orderDate - order1.orderDate);
+        return (order2.orderDate - order1.orderDate);
       }).filter((order: Order) => {
         return this.statusDetailOrderId ? order.orderId === this.statusDetailOrderId : true;
       });
