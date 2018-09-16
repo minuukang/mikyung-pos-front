@@ -3,19 +3,22 @@
     <section :class="$style.table">
       <div :class="$style.card" v-for="(table) in tableInfos">
         <header :class="$style.cardHeader">
-          <h3 :class="$style.cardTitle">{{ table.orderInfoType === 'TABLE' ? '테이블' : '테이크아웃' }} {{ table.orderInfoNo }}</h3>
+          <h3 :class="$style.cardTitle"><v-icon name="list" /> {{ table.orderInfoType === 'TABLE' ? '테이블' : '테이크아웃' }} {{ table.orderInfoNo }}</h3>
         </header>
         <div :class="$style.cardContainer">
           <template v-for="item in table.orders">
             <mt-cell
               v-for="orderItem in item.orderProducts"
               v-if="!orderItem.product.productAutoCookingCompleteYn"
+              :class="$style.item"
               :title="orderItem.product.productName"
               :label="`${orderItem.productCount}개`"
             >
-              <mt-button @click="changeStatus(item.orderId, orderItem.product.productId)" size="small" v-if="orderItem.orderProductStatus === 'ORDER_COMPLETE'">요리 시작</mt-button>
-              <mt-button @click="changeStatus(item.orderId, orderItem.product.productId)" size="small" v-else-if="orderItem.orderProductStatus === 'COOK_ING'">요리 종료</mt-button>
-              <template v-else>요리완료</template>
+              <mt-button @click="changeStatus(item.orderId, orderItem.product.productId)" size="small" v-if="orderItem.orderProductStatus === 'ORDER_COMPLETE'">
+                <v-icon name="cookie" /> 요리 시작하기</mt-button>
+              <mt-button @click="changeStatus(item.orderId, orderItem.product.productId)" size="small" v-else-if="orderItem.orderProductStatus === 'COOK_ING'">
+                <v-icon name="fire" /> 요리 종료하기</mt-button>
+              <span :class="$style.statusSuccess" v-else>요리완료</span>
             </mt-cell>
           </template>
           <!--<mt-cell title="1건 주문" label="총합 : 1500원">결제완료</mt-cell>-->
@@ -33,6 +36,13 @@
   }
 </style>
 <style lang="scss" module>
+  .statusSuccess {
+    font-weight: bold;
+    color: #ff4949;
+  }
+  .item {
+    min-height: 60px !important;
+  }
   .takeout {
     padding: 15px 0;
   }
@@ -109,8 +119,9 @@
     get tableInfos() {
       return this.orderInfos.filter((table) => {
         return table.orders.filter((order) => {
-          return order.orderPaymentYn === true &&
-            order.orderProducts.some((item) => item.product.productAutoCookingCompleteYn === false);
+          const cookingProducts = order.orderProducts.filter((item) => item.product.productAutoCookingCompleteYn === false);
+          return order.orderPaymentYn === true && cookingProducts.length &&
+            cookingProducts.length !== cookingProducts.filter((orderItem) => orderItem.orderProductStatus === 'COOK_END').length;
         }).length;
       }).sort((info1, info2) => {
         const status1 = info1.orders.every((order) => {

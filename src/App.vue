@@ -6,7 +6,7 @@
       </div>
       <h1 class="mint-header-title" :class="$style.title"><router-link :to="{ name: 'home' }">미.경.포.스</router-link></h1>
       <div class="mint-header-button is-right">
-        <v-icon name="sync" @click.native="refresh"></v-icon>
+        <v-icon scale="1.3" name="sync" @click.native="refresh"></v-icon>
       </div>
     </header>
     <router-view :class="$style.main" />
@@ -21,8 +21,8 @@
     overflow: hidden;
   }
   .title {
-    font-weight: bold;
-    font-size: 18px;
+    font-weight: bold !important;
+    font-size: 18px !important;
   }
   .main {
     flex: 1;
@@ -69,11 +69,15 @@
     protected async refresh(showIndicator = true) {
       try {
         clearTimeout(this.refreshInterval);
-        showIndicator && Indicator.open();
+        if (showIndicator) {
+          Indicator.open();
+        }
         await this.loadTables();
         this.refreshInterval = setTimeout(() => this.refresh(false), REFRESH_TIME);
       } finally {
-        showIndicator && Indicator.close();
+        if (showIndicator) {
+          Indicator.close();
+        }
       }
     }
     protected async showUserNamePrompt(): Promise<void> {

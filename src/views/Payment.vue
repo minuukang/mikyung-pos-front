@@ -30,7 +30,8 @@
     padding-bottom: 130px;
   }
   .header {
-    background-color: #ddd;
+    background-color: lighten(#55b6ff, 10%);
+    color: #ffffff;
     text-align: center;
     padding: 15px 0;
     font-size: 16px;

@@ -5,6 +5,7 @@ import Order from './views/Order.vue';
 import Payment from './views/Payment.vue';
 import Takeout from './views/Takeout.vue';
 import Foods from './views/Foods.vue';
+import Status from './views/Status.vue';
 
 Vue.use(Router);
 
@@ -30,6 +31,11 @@ export default new Router({
       path: '/payment/:orderInfoId',
       name: 'payment',
       component: Payment,
+    },
+    {
+      path: '/status/:orderId?',
+      name: 'status',
+      component: Status,
     },
     {
       path: '/takeout',

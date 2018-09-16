@@ -3,9 +3,8 @@ import Vuex from 'vuex';
 import { Product, ProductGroup, Table } from '@/store/types';
 import loadProducts from '@/api/loadProducts';
 import loadTables from '@/api/loadTables';
-import orderApi, { default as order, OrderChangeStatusPayload, OrderPaymentPayload } from '@/api/order'
+import orderApi, { OrderChangeStatusPayload } from '@/api/order';
 import users from '@/config/users.json';
-import api from '@/api'
 
 Vue.use(Vuex);
 
@@ -15,8 +14,8 @@ interface RootState {
   userName: string;
 }
 
-function roleMatch (role: string, ...matchRole: string[]): boolean {
-  return role === '*' || (!!~matchRole.indexOf(role));
+function roleMatch(role: string, ...matchRole: string[]): boolean {
+  return role === '*' || (matchRole.indexOf(role) !== -1);
 }
 
 export default new Vuex.Store<RootState>({
@@ -27,7 +26,7 @@ export default new Vuex.Store<RootState>({
   },
   getters: {
     userRole(state) {
-      return state.userName && (users.find((user) => user.name === state.userName) as any).role
+      return state.userName && (users.find((user) => user.name === state.userName) as any).role;
     },
     products(state): Product[] {
       return state.productGroups.reduce<Product[]>((result, { products }) => {

@@ -15,6 +15,7 @@ export interface Order {
   orderSuccessYn: boolean;
   orderType: string;
   receiveAmount: number;
+  table?: Table;
 }
 
 export interface OrderItem {

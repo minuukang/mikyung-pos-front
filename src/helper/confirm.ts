@@ -2,9 +2,9 @@ import { Indicator, MessageBox } from 'mint-ui';
 import Vue from 'vue';
 
 export function confirmMessage(title: string, locate?: any) {
-  return function (target: any, key: string, descriptor: PropertyDescriptor) {
-    const fn: Function = descriptor.value
-    descriptor.value = async function (this: Vue, ...args: any[]) {
+  return function confirmMessageWrapper(target: any, key: string, descriptor: PropertyDescriptor) {
+    const fn: () => void = descriptor.value;
+    descriptor.value = async function confirmMessageAction(this: Vue, ...args: any[]) {
       await MessageBox({
         $type: 'confirm',
         title: '안내',
@@ -34,6 +34,6 @@ export function confirmMessage(title: string, locate?: any) {
       } finally {
         this.$root.$emit('refresh');
       }
-    }
-  }
+    };
+  };
 }

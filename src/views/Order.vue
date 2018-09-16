@@ -1,9 +1,19 @@
 <template>
   <div>
-    <mt-cell title="테이크 아웃" label="테이크 아웃 주문을 받아봅시다." :class="$style.takeout" class="takeout">
-      <mt-button @click="$router.push({ name: 'takeout' })" :class="$style.button" type="default">현황</mt-button>
-      <mt-button :disabled="!unusingTakeoutId" @click="$router.push({ name: 'payment', params: { orderInfoId: unusingTakeoutId } })" :class="$style.button" type="primary">주문</mt-button>
-    </mt-cell>
+    <div class="mint-cell takeout" :class="$style.takeout">
+      <div class="mint-cell-wrapper">
+        <div class="mint-cell-title">
+          <span class="mint-cell-text">테이크 아웃</span>
+          <span class="mint-cell-label">테이크 아웃 주문을 받아봅시다.</span>
+        </div>
+        <div class="mint-cell-value">
+          <mt-button @click="$router.push({ name: 'takeout' })" :class="$style.button" type="default"><v-icon name="list" /> 현황</mt-button>
+          <mt-button :disabled="!unusingTakeoutId" @click="$router.push({ name: 'payment', params: { orderInfoId: unusingTakeoutId } })" :class="$style.button" type="primary">
+            <v-icon name="sign-out-alt" /> 주문
+          </mt-button>
+        </div> <!---->
+      </div>
+    </div>
     <section :class="$style.table">
       <div :class="$style.card" v-for="(table) in tableInfos">
         <header :class="$style.cardHeader">
@@ -22,19 +32,19 @@
               결제완료
             </template>
             <template v-else>
-              <mt-button :class="$style.button" size="small" @click.stop="doPayment(order)">결제요청</mt-button>
-              <mt-button :class="$style.button" size="small" type="danger" @click.stop="doDelete(order)">삭제</mt-button>
+              <mt-button :class="$style.button" size="small" @click.stop="doPayment(order)"><v-icon name="arrow-circle-up" /> 결제요청</mt-button>
+              <mt-button :class="$style.button" size="small" type="danger" @click.stop="doDelete(order)"><v-icon name="times-circle" /> 삭제</mt-button>
             </template>
           </mt-cell>
           <!--<mt-cell title="1건 주문" label="총합 : 1500원">결제완료</mt-cell>-->
         </div>
         <footer :class="$style.cardFooter">
           <template v-if="table.useYn">
-            <mt-button :class="$style.button" @click="$router.push({ name: 'payment', params: { orderInfoId: table.orderInfoId } })" type="primary">추가주문</mt-button>
-            <mt-button :class="$style.button" @click="doExitOrder(table)" type="danger">종료</mt-button>
+            <mt-button :class="$style.button" @click="$router.push({ name: 'payment', params: { orderInfoId: table.orderInfoId } })" type="primary"><v-icon name="plus-circle" /> 추가주문</mt-button>
+            <mt-button :class="$style.button" @click="doExitOrder(table)" type="danger"><v-icon name="times-circle" /> 종료</mt-button>
           </template>
           <template v-else>
-            <mt-button :class="$style.button" @click="$router.push({ name: 'payment', params: { orderInfoId: table.orderInfoId } })" type="primary">주문하기</mt-button>
+            <mt-button :class="$style.button" @click="$router.push({ name: 'payment', params: { orderInfoId: table.orderInfoId } })" type="primary"><v-icon name="plus-circle" /> 주문하기</mt-button>
           </template>
         </footer>
       </div>
@@ -48,7 +58,7 @@
 </style>
 <style lang="scss" module>
   .takeout {
-    padding: 15px 0;
+    padding: 15px 10px;
   }
   .button {
     & ~ & {
@@ -130,7 +140,7 @@
       await this.exitOrder(table.orderInfoId);
     }
     protected showStatusDetail(order: Order) {
-      this.$router.push({ name: 'status', params: { orderId: order.orderId } });
+      this.$router.push({ name: 'status', params: { orderId: String(order.orderId) } });
     }
     get tableInfos() {
       return this.tables.map((table) => {
