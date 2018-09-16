@@ -96,7 +96,7 @@
         if (!value) {
           return this.showUserNamePrompt();
         }
-        this.setUserName(value);
+        await this.setUserName(value);
       } catch (e) {
         await MessageBox({
           title: '',
