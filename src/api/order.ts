@@ -1,44 +1,52 @@
-import api from './index'
-import { Order } from '@/store/types'
+import api from './index';
+import { Order } from '@/store/types';
 
 export interface OrderPaymentItem {
-  productId: number
-  productOrderCount: number
+  productId: number;
+  productOrderCount: number;
 }
 
 export interface OrderPaymentPayload {
-  tableNo: number
-  orderOwnerName: string
-  products: OrderPaymentItem[]
+  tableNo: number;
+  orderOwnerName: string;
+  products: OrderPaymentItem[];
 }
 
 export interface OrderUpdatePayload {
-  orderId: number
-  products: OrderPaymentItem[]
+  orderId: number;
+  products: OrderPaymentItem[];
+}
+
+export interface OrderChangeStatusPayload {
+  orderInfoId: number;
+  productId: number;
 }
 
 export interface OrderAndProductPayment {
-  orderId: number
-  orderProductId: number
+  orderId: number;
+  orderProductId: number;
 }
 
 export default {
-  paymentOrder (payload: OrderPaymentPayload) {
-    return api.post('/orders', payload)
+  paymentOrder(payload: OrderPaymentPayload) {
+    return api.post('/orders', payload);
   },
-  detail (orderId: number): Promise<Order> {
-    return api.get(`/orders/${orderId}`).then(({ data }) => data)
+  exitOrder(orderId: number) {
+    return api.put(`/orders/info/${orderId}/exit`).then(({ data }) => data);
   },
-  updateOrder ({ orderId, products }: OrderUpdatePayload) {
-    return api.put(`/orders/${orderId}`, { products })
+  changeStatus({ orderInfoId, productId }: OrderChangeStatusPayload) {
+    return api.put(`/orders/${orderInfoId}/products/${productId}/changeStatus`);
   },
-  complete (orderId: number) {
-    return api.put(`/orders/${orderId}/orderComplete`)
+  completePayment(orderId: number) {
+    return api.put(`/orders/${orderId}/completePayment`).then(({ data }) => data);
   },
-  cookingComplete ({ orderId, orderProductId }: OrderAndProductPayment) {
-    return api.put(`/orders/${orderId}/orderProduct/${orderProductId}/cookingComplete`)
+  detail(orderId: number): Promise<Order> {
+    return api.get(`/orders/${orderId}`).then(({ data }) => data);
   },
-  paymentComplete ({ orderId, orderProductId }: OrderAndProductPayment) {
-    return api.put(`/orders/${orderId}/orderProduct/${orderProductId}/cookingComplete`)
-  }
-}
+  updateOrder({ orderId, products }: OrderUpdatePayload) {
+    return api.put(`/orders/${orderId}`, { products });
+  },
+  complete(orderId: number) {
+    return api.put(`/orders/${orderId}/orderComplete`);
+  },
+};

@@ -30,35 +30,37 @@
 </style>
 <script lang="ts">
   import { Component, Vue, Prop, Model } from 'vue-property-decorator';
-  import { Food } from '../store/types'
+  import { Product } from '../store/types';
 
   export interface ProductEa {
-    productId: number
-    ea: number
+    productId: number;
+    ea: number;
   }
 
   @Component({
-    name: 'food-item'
+    name: 'food-item',
   })
   export default class FoodItem extends Vue {
-    @Model('input') ea: ProductEa[];
-    @Prop({ required: true }) model: Food;
-    get eaData (): ProductEa {
-      return this.ea.find(ea => ea.productId === this.model.productId);
+    @Model('input')
+    protected ea: ProductEa[];
+    @Prop({ required: true })
+    protected model: Product;
+    get eaData(): ProductEa {
+      return this.ea.find((ea) => ea.productId === this.model.productId) as ProductEa;
     }
-    get value (): number {
+    get value(): number {
       return this.eaData ? this.eaData.ea : 0;
     }
-    set value (value: number) {
-      this.$emit('input', this.ea.filter(data => data.productId !== this.model.productId).concat({
+    set value(value: number) {
+      this.$emit('input', this.ea.filter((data) => data.productId !== this.model.productId).concat({
         productId: this.model.productId,
-        ea: value
+        ea: value,
       }));
     }
-    up () {
+    protected up() {
       this.value ++;
     }
-    down () {
+    protected down() {
       if (this.value) {
         this.value --;
       }

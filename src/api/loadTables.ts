@@ -1,7 +1,7 @@
 import api from './index';
-import { Table } from '@/store/types'
+import { Table } from '@/store/types';
 
-export default function loadInfos (): Promise<Table[]> {
+export default function loadInfos(): Promise<Table[]> {
   return api.get('/orders/info')
-    .then(({ data }) => data)
+    .then(({ data }) => data);
 }

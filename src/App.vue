@@ -1,13 +1,26 @@
 <template>
-  <div id="app">
+  <div id="app" :class="$style.container">
     <mt-header title="미.경.포.스">
       <mt-button slot="left" @click="$router.back()" icon="back"></mt-button>
       <mt-button slot="right" @click="refresh" icon="more"></mt-button>
     </mt-header>
-    <router-view/>
+    <router-view :class="$style.main" />
   </div>
 </template>
 <style lang="scss" src="./style.scss"></style>
+<style lang="scss" module>
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+  .main {
+    flex: 1;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+</style>
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
   import { Action, State } from 'vuex-class';
@@ -19,44 +32,49 @@
     },
   })
   export default class App extends Vue {
-    @Action('loadProductGroups') loadProductGroups: ActionMethod
-    @Action('loadTables') loadTables: ActionMethod
-    @Action('loadUserName') loadUserName: ActionMethod
-    @Action('setUserName') setUserName: ActionMethod
-    @State('userName') userName: string
-    async created () {
-      await this.refresh()
+    @Action('loadProductGroups')
+    protected loadProductGroups: ActionMethod;
+    @Action('loadTables')
+    protected loadTables: ActionMethod;
+    @Action('loadUserName')
+    protected loadUserName: ActionMethod;
+    @Action('setUserName')
+    protected setUserName: ActionMethod;
+    @State('userName')
+    protected userName: string;
+    protected async created() {
+      this.$root.$on('refresh', this.refresh);
+      await this.refresh();
     }
-   async refresh () {
+    protected async refresh() {
       try {
         Indicator.open();
         await Promise.all([
           this.loadProductGroups(),
           this.loadTables(),
-          this.loadUserName()
+          this.loadUserName(),
         ]);
         if (!this.userName) {
-          this.$router.push({ name: 'home' })
-          this.showUserNamePrompt()
+          this.$router.push({ name: 'home' });
+          this.showUserNamePrompt();
         }
       } finally {
         Indicator.close();
       }
-
     }
-    showUserNamePrompt () {
+    protected showUserNamePrompt() {
       MessageBox({
         $type: 'prompt',
         title: '',
         message: '당신의 이름을 입력해주세요.',
         showCancelButton: false,
         showInput: true,
-        confirmButtonText: '확인'
-      }).then(({ value, action }) => {
+        confirmButtonText: '확인',
+      }).then(({ value }: any) => {
         if (!value) {
-          return this.showUserNamePrompt()
+          return this.showUserNamePrompt();
         }
-        this.setUserName(value)
+        this.setUserName(value);
       });
     }
   }

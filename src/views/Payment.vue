@@ -52,15 +52,15 @@
 </style>
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
-  import { State, Action, Getter } from 'vuex-class'
-  import { ActionMethod } from 'vuex'
-  import { ProductGroup, Product, Table } from '../store/types'
-  import FoodItem from '../components/FoodItem'
-  import { Indicator, MessageBox } from 'mint-ui'
+  import { State, Action, Getter } from 'vuex-class';
+  import { ActionMethod } from 'vuex';
+  import { ProductGroup, Product, Table } from '../store/types';
+  import FoodItem from '../components/FoodItem.vue';
+  import { Indicator, MessageBox } from 'mint-ui';
 
   export interface ProductEa {
-    productId: number
-    ea: number
+    productId: number;
+    ea: number;
   }
 
   @Component({
@@ -69,64 +69,66 @@
     },
   })
   export default class Order extends Vue {
-    @State('productGroups') productGroups: ProductGroup[]
-    @State('orderInfos') orderInfos: Table[]
-    @Getter('products') products: Product[]
-    @Action('paymentOrder') paymentOrder: ActionMethod
-    productEa: ProductEa[] = []
-    get orderInfo () {
-      return this.orderInfos.find(info => info.orderInfoId === this.orderInfoId)
+    @State('productGroups')
+    protected productGroups: ProductGroup[];
+    @State('orderInfos')
+    protected orderInfos: Table[];
+    @Getter('products')
+    protected products: Product[];
+    @Action('paymentOrder')
+    protected paymentOrder: ActionMethod;
+    protected productEa: ProductEa[] = [];
+    get orderInfo() {
+      return this.orderInfos.find((info) => info.orderInfoId === this.orderInfoId);
     }
-    get orderInfoId () {
-      return Number(this.$route.params.orderInfoId)
+    get orderInfoId() {
+      return Number(this.$route.params.orderInfoId);
     }
-    async doAction () {
+    protected async doAction() {
       if (this.orderProducts.length) {
-        try {
-          await MessageBox({
-            $type: 'confirm',
-            title: '안내',
-            message: '정말로 주문하시겠습니까?',
-            showCancelButton: true,
-            confirmButtonText: '확인',
-            cancelButtonText: '취소'
-          })
-          Indicator.open('주문중...');
-          await this.paymentOrder({
-            orderInfoId: Number(this.orderInfoId),
-            products: this.orderProducts.map(({ ea, product }) => {
-              return {
-                productId: product.productId,
-                productCount: ea
-              }
-            })
-          });
-          Indicator.close();
-          await MessageBox({
-            title: '안내',
-            message: '주문이 완료되었습니다!',
-            confirmButtonText: '확인'
-          })
-          this.$router.push({ name: 'home' })
-        } catch (e) {
-        }
+        await MessageBox({
+          $type: 'confirm',
+          title: '안내',
+          message: '정말로 주문하시겠습니까?',
+          showCancelButton: true,
+          confirmButtonText: '확인',
+          cancelButtonText: '취소',
+        });
+        Indicator.open('주문중...');
+        await this.paymentOrder({
+          orderInfoId: Number(this.orderInfoId),
+          products: this.orderProducts.map(({ ea, product }) => {
+            return {
+              productId: product.productId,
+              productCount: ea,
+            };
+          }),
+        });
+        Indicator.close();
+        await MessageBox({
+          title: '안내',
+          message: '주문이 완료되었습니다!',
+          confirmButtonText: '확인',
+        });
+        this.$root.$emit('refresh');
+        this.$router.push({ name: 'home' });
       }
     }
-    get orderProducts () {
+    get orderProducts() {
       return this.productEa.filter(({ ea }) => ea > 0).map(({ productId, ea }) => {
-        const product = this.products.find(food => food.productId === productId) as Product
+        const product = this.products.find((food) => food.productId === productId) as Product;
         return {
           product,
-          ea
-        }
+          ea,
+        };
       }).sort((product1, product2) => {
-        return product1.product.productId - product2.product.productId
-      })
+        return product1.product.productId - product2.product.productId;
+      });
     }
-    get totalPrice () {
+    get totalPrice() {
       return this.orderProducts.reduce((result, { product, ea }) => {
-        return result + (ea * product.salesAmount)
-      }, 0)
+        return result + (ea * product.salesAmount);
+      }, 0);
     }
   }
 </script>

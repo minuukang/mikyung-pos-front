@@ -1,7 +1,7 @@
 import api from './index';
-import { Food } from '@/store/types'
+import { Product } from '@/store/types';
 
-export default function loadProducts (): Promise<[]> {
+export default function loadProducts(): Promise<Product[]> {
   return api.get('/products')
-    .then(({ data }) => data)
+    .then(({ data }) => data);
 }

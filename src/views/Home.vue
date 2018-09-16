@@ -1,18 +1,26 @@
 <template>
-  <div class="home">
-    <ul>
-      <li><mt-button type="primary" size="large" @click="$router.push({ name: 'order' })">주문 받기</mt-button></li>
-      <li><mt-button type="default" size="large" @click="$router.push({ name: 'order' })">테이블 현황</mt-button></li>
-      <li><mt-button type="default" size="large" @click="$router.push({ name: 'order' })">요리 현황</mt-button></li>
+  <div :class="$style.container">
+    <ul :class="$style.list">
+      <li :class="$style.item"><mt-button type="primary" size="large" @click="$router.push({ name: 'order' })">주문 및 테이블</mt-button></li>
+      <li :class="$style.item"><mt-button type="default" size="large" @click="$router.push({ name: 'foods' })">요리</mt-button></li>
     </ul>
   </div>
 </template>
-<style lang="scss" scoped>
-  ul {
-    padding: 2rem;
+<style lang="scss" module>
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
   }
-  li ~ li {
-    margin-top: 1.5rem;
+  .list {
+    width: 100%;
+  }
+  .item {
+    & ~ & {
+      margin-top: 15px;
+    }
   }
 </style>
 <script lang="ts">

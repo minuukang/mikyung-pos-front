@@ -9,7 +9,6 @@
       </div>
       <footer :class="$style.cardFooter">
         <mt-button :class="$style.button" type="primary">완료</mt-button>
-        <mt-button :class="$style.button" @click="$router.push({ name: 'payment', params: { orderInfoId: takeout.orderInfoId } })" type="default">수정</mt-button>
         <mt-button :class="$style.button" type="danger">취소</mt-button>
       </footer>
     </div>
@@ -54,14 +53,16 @@
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
   import { Getter } from 'vuex-class';
-  import { Table } from '../store/types'
+  import { Table } from '../store/types';
 
   @Component({
     components: {
     },
   })
-  export default class Order extends Vue {
-    @Getter('unusingTakeoutId') unusingTakeoutId: number | null
-    @Getter('usingTakeouts') takeouts: Table[]
+  export default class Takeout extends Vue {
+    @Getter('unusingTakeoutId')
+    protected unusingTakeoutId: number | null;
+    @Getter('usingTakeouts')
+    protected takeouts: Table[];
   }
 </script>
