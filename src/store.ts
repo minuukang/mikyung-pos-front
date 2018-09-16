@@ -4,6 +4,7 @@ import { Product, ProductGroup, Table } from '@/store/types';
 import loadProducts from '@/api/loadProducts';
 import loadTables from '@/api/loadTables';
 import orderApi from '@/api/order';
+import users from '@/config/users.json'
 
 Vue.use(Vuex);
 
@@ -83,11 +84,15 @@ export default new Vuex.Store<RootState>({
     },
     loadUserName(context) {
       const userName = localStorage.getItem('posUserName') || '';
-      return context.dispatch('setUserName', userName);
+      return userName && context.dispatch('setUserName', userName);
     },
     setUserName(context, payload: string) {
-      localStorage.setItem('posUserName', payload);
-      context.commit('setUserName', payload);
+      if (users.some(user => user.name === payload)) {
+        localStorage.setItem('posUserName', payload);
+        context.commit('setUserName', payload);
+      } else {
+        throw new Error('미경이 아니시네요!');
+      }
     },
   },
 });

@@ -99,7 +99,7 @@
     @Getter('unusingTakeoutId')
     protected unusingTakeoutId: number | null;
     public remainDate (date: number) {
-      return date && moment(date).add(90, 'm').format('H:m');
+      return date && moment(date).add(90, 'm').format('H:mm');
     }
     protected async doPayment(order: Order) {
       await MessageBox({
@@ -143,7 +143,7 @@
       await MessageBox({
         $type: 'confirm',
         title: '안내',
-        message: '정말로 종료하시겠습니까?',
+        message: '정말로 테이블 이용을 종료하시겠습니까?',
         showCancelButton: true,
         confirmButtonText: '확인',
         cancelButtonText: '취소',
@@ -153,7 +153,7 @@
       Indicator.close();
       await MessageBox({
         title: '안내',
-        message: '주문이 종료되었습니다!',
+        message: '테이블 이용이 종료되었습니다!',
         confirmButtonText: '확인',
       });
       this.$root.$emit('refresh');

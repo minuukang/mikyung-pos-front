@@ -1,6 +1,6 @@
 <template>
   <div :class="$style.container">
-    <template v-for="takeout in takeouts">
+    <template v-for="takeout in takeoutsAsc">
       <div :class="$style.card" v-for="order in takeout.orders">
         <header :class="$style.cardHeader">
           <h3 :class="$style.cardTitle">대기번호 {{ takeout.orderInfoNo }}</h3>
@@ -71,6 +71,11 @@
     protected unusingTakeoutId: number | null;
     @Getter('usingTakeouts')
     protected takeouts: Table[];
+    get takeoutsAsc(): Table[] {
+      return this.takeouts.slice().sort((info1, info2) => {
+        return info1.infoBeginDate - info2.infoBeginDate
+      })
+    }
     protected async doPayment(order: Order) {
       await MessageBox({
         $type: 'confirm',

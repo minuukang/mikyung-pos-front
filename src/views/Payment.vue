@@ -126,7 +126,7 @@
           confirmButtonText: '확인',
         });
         this.$root.$emit('refresh');
-        this.$router.push({ name: 'home' });
+        this.$router.push({ name: 'order' });
       }
     }
     get orderProducts() {

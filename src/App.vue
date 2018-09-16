@@ -1,9 +1,14 @@
 <template>
   <div id="app" :class="$style.container">
-    <mt-header title="미.경.포.스">
-      <mt-button slot="left" @click="$router.back()" icon="back"></mt-button>
-      <v-icon name="sync" slot="right" @click.native="refresh"></v-icon>
-    </mt-header>
+    <header class="mint-header">
+      <div class="mint-header-button is-left">
+        <mt-button slot="left" @click="$router.back()" icon="back"></mt-button>
+      </div>
+      <h1 class="mint-header-title"><router-link :to="{ name: 'home' }">미.경.포.스</router-link></h1>
+      <div class="mint-header-button is-right">
+        <v-icon name="sync" @click.native="refresh"></v-icon>
+      </div>
+    </header>
     <router-view :class="$style.main" />
   </div>
 </template>
@@ -42,13 +47,16 @@
     protected setUserName: ActionMethod;
     @State('userName')
     protected userName: string;
+    private refreshInterval: number = 0;
     protected async created() {
       this.$root.$on('refresh', this.refresh);
+      clearInterval(this.refreshInterval);
+      this.refreshInterval = setInterval(() => this.refresh(false), 6000);
       await this.refresh();
     }
-    protected async refresh() {
+    protected async refresh(showIndicator = true) {
       try {
-        Indicator.open();
+        showIndicator && Indicator.open();
         await Promise.all([
           this.loadProductGroups(),
           this.loadTables(),
@@ -59,23 +67,33 @@
           this.showUserNamePrompt();
         }
       } finally {
-        Indicator.close();
+        showIndicator && Indicator.close();
       }
     }
     protected async showUserNamePrompt(): Promise<void> {
-      const { value }: { value: string } = await MessageBox({
-        $type: 'prompt',
-        title: '',
-        message: '당신의 이름을 입력해주세요.',
-        showCancelButton: false,
-        showInput: true,
-        closeOnClickModal: false,
-        confirmButtonText: '확인',
-      });
-      if (!value) {
+      try {
+        const { value }: { value: string } = await MessageBox({
+          $type: 'prompt',
+          title: '',
+          message: '당신의 이름을 입력해주세요.',
+          showCancelButton: false,
+          showInput: true,
+          closeOnClickModal: false,
+          confirmButtonText: '확인',
+        });
+        if (!value) {
+          return this.showUserNamePrompt();
+        }
+        this.setUserName(value);
+      } catch (e) {
+        await MessageBox({
+          title: '',
+          message: e.message,
+          closeOnClickModal: false,
+          confirmButtonText: '확인',
+        });
         return this.showUserNamePrompt();
       }
-      this.setUserName(value);
     }
   }
 </script>
