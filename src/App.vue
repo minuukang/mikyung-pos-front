@@ -56,10 +56,12 @@
     private refreshInterval: any = 0;
     protected async created() {
       this.$root.$on('refresh', this.refresh);
+      Indicator.open();
       await Promise.all([
         this.loadProductGroups(),
         this.loadUserName(),
       ]);
+      Indicator.close();
       if (!this.userName) {
         this.$router.push({ name: 'home' });
         await this.showUserNamePrompt();
