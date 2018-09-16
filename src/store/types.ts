@@ -4,6 +4,7 @@ export interface Table {
   orderInfoNo: number;
   useYn: boolean;
   orders: Order[];
+  infoBeginDate: number;
 }
 
 export interface Order {
@@ -13,6 +14,7 @@ export interface Order {
   orderPaymentYn: boolean;
   orderSuccessYn: boolean;
   orderType: string;
+  receiveAmount: number;
 }
 
 export interface OrderItem {
@@ -34,4 +36,5 @@ export interface Product {
   originAmount: number;
   salesAmount: number;
   soldoutYn: boolean;
+  productAutoCookingCompleteYn: boolean;
 }

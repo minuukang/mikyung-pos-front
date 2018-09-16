@@ -5,12 +5,21 @@
       <mt-button :disabled="!unusingTakeoutId" @click="$router.push({ name: 'payment', params: { orderInfoId: unusingTakeoutId } })" :class="$style.button" type="primary">주문</mt-button>
     </mt-cell>
     <section :class="$style.table">
-      <div :class="$style.card" v-for="(table, index) in tableInfos">
+      <div :class="$style.card" v-for="(table) in tableInfos">
         <header :class="$style.cardHeader">
-          <h3 :class="$style.cardTitle">테이블 {{ index + 1 }}</h3>
+          <h3 :class="$style.cardTitle"><v-icon name="list" /> 테이블 {{ table.orderInfoNo }}</h3>
+          <p :class="$style.cardRight" v-if="table.infoBeginDate">종료시간 {{ remainDate(table.infoBeginDate) }}</p>
         </header>
         <div :class="$style.cardContainer">
-          <mt-cell v-for="order in table.orders" :title="`${order.orderProducts.length}건 주문`" :label="`총합 : ${order.totalPrice}원`">결제완료</mt-cell>
+          <mt-cell v-for="order in table.orders" :title="`${order.orderProducts.length}건 주문`" :label="`총합 : ${order.totalPrice}원`">
+            <template v-if="order.orderPaymentYn">
+              결제완료
+            </template>
+            <template v-else>
+              <mt-button :class="$style.button" size="small" @click="doPayment(order)">결제요청</mt-button>
+              <mt-button :class="$style.button" size="small" type="danger" @click="doDelete(order)">삭제</mt-button>
+            </template>
+          </mt-cell>
           <!--<mt-cell title="1건 주문" label="총합 : 1500원">결제완료</mt-cell>-->
         </div>
         <footer :class="$style.cardFooter">
@@ -50,6 +59,9 @@
     }
     &Header {
       padding-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
     }
     &Title {
       font-size: 16px;
@@ -72,24 +84,61 @@
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
   import { Getter } from 'vuex-class';
-  import { Table } from '../store/types';
+  import { Order, Table } from '../store/types';
   import { Indicator, MessageBox } from 'mint-ui';
   import api from '@/api/order';
-
-  export interface ProductEa {
-    id: number;
-    ea: number;
-  }
+  import moment from 'moment'
 
   @Component({
     components: {
     },
   })
-  export default class Order extends Vue {
+  export default class OrderComponent extends Vue {
     @Getter('tables')
     protected tables: Table[];
     @Getter('unusingTakeoutId')
     protected unusingTakeoutId: number | null;
+    public remainDate (date: number) {
+      return date && moment(date).add(90, 'm').format('H:m');
+    }
+    protected async doPayment(order: Order) {
+      await MessageBox({
+        $type: 'confirm',
+        title: '안내',
+        message: '주문건 결제를 요청하시겠습니까?',
+        showCancelButton: true,
+        confirmButtonText: '확인',
+        cancelButtonText: '취소',
+      });
+      Indicator.open('결제중...');
+      await api.completePayment(order.orderId);
+      Indicator.close();
+      await MessageBox({
+        title: '안내',
+        message: '결제가 완료되었습니다!',
+        confirmButtonText: '확인',
+      });
+      this.$root.$emit('refresh');
+    }
+    protected async doDelete(order: Order) {
+      await MessageBox({
+        $type: 'confirm',
+        title: '안내',
+        message: '주문건을 삭제하시겠습니까?',
+        showCancelButton: true,
+        confirmButtonText: '확인',
+        cancelButtonText: '취소',
+      });
+      Indicator.open('삭제중...');
+      await api.deleteOrder(order.orderId);
+      Indicator.close();
+      await MessageBox({
+        title: '안내',
+        message: '주문이 삭제되었습니다!',
+        confirmButtonText: '확인',
+      });
+      this.$root.$emit('refresh');
+    }
     protected async exitOrder(table: Table) {
       await MessageBox({
         $type: 'confirm',

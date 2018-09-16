@@ -1,12 +1,23 @@
 <template>
   <div>
     <section :class="$style.table">
-      <div :class="$style.card" v-for="(table, index) in tableInfos">
+      <div :class="$style.card" v-for="(table) in tableInfos">
         <header :class="$style.cardHeader">
-          <h3 :class="$style.cardTitle">테이블 {{ index + 1 }}</h3>
+          <h3 :class="$style.cardTitle">{{ table.orderInfoType === 'TABLE' ? '테이블' : '테이크아웃' }} {{ table.orderInfoNo }}</h3>
         </header>
         <div :class="$style.cardContainer">
-          <mt-cell v-for="order in table.orders" :title="`${order.orderProducts.length}건 주문`" :label="`총합 : ${order.totalPrice}원`">결제완료</mt-cell>
+          <template v-for="item in table.orders">
+            <mt-cell
+              v-for="orderItem in item.orderProducts"
+              v-if="!orderItem.product.productAutoCookingCompleteYn"
+              :title="orderItem.product.productName"
+              :label="`${orderItem.productCount}개`"
+            >
+              <mt-button @click="changeStatus(item.orderId, orderItem.product.productId)" size="small" v-if="orderItem.orderProductStatus === 'ORDER_COMPLETE'">요리 시작</mt-button>
+              <mt-button @click="changeStatus(item.orderId, orderItem.product.productId)" size="small" v-else-if="orderItem.orderProductStatus === 'COOK_ING'">요리 종료</mt-button>
+              <template v-else>요리완료</template>
+            </mt-cell>
+          </template>
           <!--<mt-cell title="1건 주문" label="총합 : 1500원">결제완료</mt-cell>-->
         </div>
         <footer :class="$style.cardFooter">
@@ -61,8 +72,8 @@
 </style>
 <script lang="ts">
   import { Component, Vue } from 'vue-property-decorator';
-  import { Getter } from 'vuex-class';
-  import { Table } from '../store/types';
+  import { Getter, State } from 'vuex-class';
+  import { OrderItem, Table } from '../store/types';
   import { Indicator, MessageBox } from 'mint-ui';
   import api from '@/api/order';
 
@@ -71,32 +82,44 @@
     },
   })
   export default class Order extends Vue {
-    @Getter('tables')
-    protected tables: Table[];
-    @Getter('unusingTakeoutId')
-    protected unusingTakeoutId: number | null;
-    protected async exitOrder(table: Table) {
+    @State('orderInfos')
+    protected orderInfos: Table[];
+    protected async changeStatus(orderId: number, productId: number) {
       await MessageBox({
         $type: 'confirm',
         title: '안내',
-        message: '정말로 종료하시겠습니까?',
+        message: '정말로 상태를 변경하시겠습니까?',
         showCancelButton: true,
         confirmButtonText: '확인',
         cancelButtonText: '취소',
       });
-      Indicator.open('종료중...');
-      await api.exitOrder(table.orderInfoId);
+      Indicator.open('변경중...');
+      await api.changeStatus({
+        orderId,
+        productId,
+      });
       Indicator.close();
       await MessageBox({
         title: '안내',
-        message: '주문이 종료되었습니다!',
+        message: '상태가 변경되었습니다!',
         confirmButtonText: '확인',
       });
       this.$root.$emit('refresh');
     }
     get tableInfos() {
-      return this.tables.filter((table) => {
-        return table.orders.length;
+      return this.orderInfos.filter((table) => {
+        return table.orders.filter((order) => {
+          return order.orderPaymentYn === true &&
+            order.orderProducts.some((item) => item.product.productAutoCookingCompleteYn === false);
+        }).length;
+      }).sort((info1, info2) => {
+        const status1 = info1.orders.every((order) => {
+          return order.orderProducts.every((item) => item.orderProductStatus === 'COOK_END');
+        });
+        const status2 = info2.orders.every((order) => {
+          return order.orderProducts.every((item) => item.orderProductStatus === 'COOK_END');
+        });
+        return Number(status1) - Number(status2);
       });
     }
   }

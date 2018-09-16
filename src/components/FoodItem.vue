@@ -1,30 +1,41 @@
 <template>
-  <mt-cell :title="model.productName" :label="`${model.salesAmount}원`">
+  <mt-cell :class="$style.container" :title="model.productName" :label="`${model.salesAmount}원`">
     <div :class="$style.range">
-      <button type="button" :class="$style.rangeButton" @click="down">-</button>
+      <button type="button" :class="$style.rangeButton" @click="down"><v-icon name="minus"></v-icon></button>
       <input type="number" :class="$style.rangeInput" v-model.number="value">
-      <button type="button" :class="$style.rangeButton" @click="up">+</button>
+      <button type="button" :class="$style.rangeButton" @click="up"><v-icon name="plus"></v-icon></button>
     </div>
   </mt-cell>
 </template>
 <style lang="scss" module>
+  .container {
+    min-height: 60px !important;
+  }
   .name {
-    font-size: 1.5rem;
+    font-size: 15px;
   }
   .range {
     display: flex;
-    width: 15rem;
+    width: 120px;
     border: 1px solid #eeeeee;
+    height: 30px;
     &Button {
       background-color: #eeeeee;
-      border: 0;
-      width: 3rem;
+      width: 30px;
+      height: 100%;
+      > * {
+        pointer-events: none;
+      }
     }
     &Input {
       flex: 1;
       text-align: center;
       width: 100%;
       display: block;
+      border: 0;
+      box-shadow: none;
+      background-color: transparent;
+      appearance: none;
     }
   }
 </style>

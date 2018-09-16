@@ -1,8 +1,10 @@
 <template>
   <div :class="$style.container">
     <ul :class="$style.list">
-      <li :class="$style.item"><mt-button type="primary" size="large" @click="$router.push({ name: 'order' })">주문 및 테이블</mt-button></li>
-      <li :class="$style.item"><mt-button type="default" size="large" @click="$router.push({ name: 'foods' })">요리</mt-button></li>
+      <li :class="$style.item"><mt-button type="primary" size="large" @click="$router.push({ name: 'order' })">
+        <v-icon name="credit-card" /> 주문 및 테이블</mt-button></li>
+      <li :class="$style.item"><mt-button type="default" size="large" @click="$router.push({ name: 'foods' })">
+        <v-icon name="cookie" /> 요리</mt-button></li>
     </ul>
   </div>
 </template>

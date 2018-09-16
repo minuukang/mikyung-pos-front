@@ -9,6 +9,7 @@ export interface OrderPaymentItem {
 export interface OrderPaymentPayload {
   tableNo: number;
   orderOwnerName: string;
+  receiveAmount: number;
   products: OrderPaymentItem[];
 }
 
@@ -18,7 +19,7 @@ export interface OrderUpdatePayload {
 }
 
 export interface OrderChangeStatusPayload {
-  orderInfoId: number;
+  orderId: number;
   productId: number;
 }
 
@@ -34,11 +35,14 @@ export default {
   exitOrder(orderId: number) {
     return api.put(`/orders/info/${orderId}/exit`).then(({ data }) => data);
   },
-  changeStatus({ orderInfoId, productId }: OrderChangeStatusPayload) {
-    return api.put(`/orders/${orderInfoId}/products/${productId}/changeStatus`);
+  changeStatus({ orderId, productId }: OrderChangeStatusPayload) {
+    return api.put(`/orders/${orderId}/products/${productId}/changeStatus`);
   },
   completePayment(orderId: number) {
     return api.put(`/orders/${orderId}/completePayment`).then(({ data }) => data);
+  },
+  deleteOrder(orderId: number) {
+    return api.delete(`/orders/${orderId}`);
   },
   detail(orderId: number): Promise<Order> {
     return api.get(`/orders/${orderId}`).then(({ data }) => data);

@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div :class="{[$style.active]: totalPrice}">
     <header :class="$style.header" v-if="orderInfo">
-      <h2 :class="$style.title">{{ orderInfo.orderInfoType === 'TABLE' ? `테이블 No.${orderInfo.orderInfoNo}` : '테이크아웃' }} 주문</h2>
+      <h2 :class="$style.title">{{ orderInfo.orderInfoType === 'TABLE' ? `${orderInfo.orderInfoNo}번 테이블` : '테이크아웃' }} 주문</h2>
     </header>
     <dl :class="$style.group" v-for="group in productGroups">
       <dt :class="$style.groupTitle">{{ group.productGroupName }}</dt>
@@ -15,12 +15,16 @@
     <!--</section>-->
     <transition enter-active-class="animated slideInUp" leave-active-class="animated slideOutDown">
       <aside :class="$style.result" v-if="totalPrice">
+        <input type="tel" v-model="receiveAmount" name="receiveAmount" id="receiveAmount" :class="$style.resultInput" placeholder="받은 금액">
         <mt-button @click="doAction" :class="$style.resultItem" size="large" type="primary">주문완료 ({{ totalPrice }}원)</mt-button>
       </aside>
     </transition>
   </div>
 </template>
 <style lang="scss" module>
+  .active {
+    padding-bottom: 82px;
+  }
   .header {
     background-color: #ddd;
     text-align: center;
@@ -31,12 +35,21 @@
     position: fixed;
     z-index: 15;
     bottom: 0;
+    border-top: 1px solid #eeeeee;
     width: 100%;
     left: 0;
     display: flex;
+    flex-direction: column;
     background-color: #ffffff;
     animation-duration: 400ms;
     padding: 15px;
+    &Input {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #dfdfdf;
+    }
     &Item {
       flex: 1;
     }
@@ -78,6 +91,7 @@
     @Action('paymentOrder')
     protected paymentOrder: ActionMethod;
     protected productEa: ProductEa[] = [];
+    public receiveAmount: number | null = null
     get orderInfo() {
       return this.orderInfos.find((info) => info.orderInfoId === this.orderInfoId);
     }
@@ -97,6 +111,7 @@
         Indicator.open('주문중...');
         await this.paymentOrder({
           orderInfoId: Number(this.orderInfoId),
+          receiveAmount: Number(this.receiveAmount) || this.totalPrice,
           products: this.orderProducts.map(({ ea, product }) => {
             return {
               productId: product.productId,

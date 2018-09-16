@@ -2,7 +2,7 @@
   <div id="app" :class="$style.container">
     <mt-header title="미.경.포.스">
       <mt-button slot="left" @click="$router.back()" icon="back"></mt-button>
-      <mt-button slot="right" @click="refresh" icon="more"></mt-button>
+      <v-icon name="sync" slot="right" @click.native="refresh"></v-icon>
     </mt-header>
     <router-view :class="$style.main" />
   </div>
@@ -62,20 +62,20 @@
         Indicator.close();
       }
     }
-    protected showUserNamePrompt() {
-      MessageBox({
+    protected async showUserNamePrompt() {
+      const { value } = await MessageBox({
         $type: 'prompt',
         title: '',
         message: '당신의 이름을 입력해주세요.',
         showCancelButton: false,
         showInput: true,
+        closeOnClickModal: false,
         confirmButtonText: '확인',
-      }).then(({ value }: any) => {
-        if (!value) {
-          return this.showUserNamePrompt();
-        }
-        this.setUserName(value);
       });
+      if (!value) {
+        return this.showUserNamePrompt();
+      }
+      this.setUserName(value);
     }
   }
 </script>
