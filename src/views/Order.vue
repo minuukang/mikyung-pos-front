@@ -144,7 +144,7 @@
       this.currentTime = Date.now();
     }
     protected cardTimeOver(date: number) {
-      return date && Math.abs(moment(date).diff(this.currentTime) / 60000) > 90;
+      return date && moment(date).diff(this.currentTime / 60000) < -90;
     }
     protected remainDate(date: number) {
       return date && moment(date).add(90, 'm').format('H:mm');
