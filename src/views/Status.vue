@@ -1,6 +1,9 @@
 <template>
   <div :class="$style.container">
-    <order-card v-for="order in availableOrders" :order="order" :table="order.table"></order-card>
+    <template v-if="availableOrders.length">
+      <order-card v-for="order in availableOrders" :order="order" :table="order.table"></order-card>
+    </template>
+    <no-data v-else></no-data>
   </div>
 </template>
 <style lang="scss" module>
@@ -13,10 +16,12 @@
   import { State } from 'vuex-class';
   import { Order, Table } from '../store/types';
   import OrderCard from '../components/OrderCard.vue';
+  import NoData from '../components/NoData.vue';
 
   @Component({
     components: {
       OrderCard,
+      NoData,
     },
   })
   export default class Status extends Vue {

@@ -15,14 +15,14 @@
       </div>
     </div>
     <section :class="$style.table">
-      <div :class="$style.card" v-for="(table) in tableInfos">
+      <div :class="[$style.card, {[$style.error]: cardTimeOver(table.infoBeginDate)}]" v-for="(table) in tableInfos">
         <header :class="$style.cardHeader">
           <h3 :class="$style.cardTitle"><v-icon name="list" /> 테이블 {{ table.orderInfoNo }}</h3>
-          <p :class="$style.cardRight" v-if="table.infoBeginDate">종료시간 {{ remainDate(table.infoBeginDate) }}</p>
+          <p :class="[$style.cardRight, {[$style.errorStatus]: cardTimeOver(table.infoBeginDate)}]" v-if="table.infoBeginDate">종료시간 {{ remainDate(table.infoBeginDate) }}</p>
         </header>
         <div :class="$style.cardContainer">
           <mt-cell
-            :class="$style.cardItem"
+            :class="[$style.cardItem]"
             v-for="order in table.orders"
             :title="`${order.orderProducts.length}건 주문`"
             :label="`총합 : ${$options.filters.numberFormat(order.totalPrice)}원`"
@@ -96,6 +96,14 @@
       }
     }
   }
+  .errorStatus {
+    color: #ff4949;
+    font-weight: bold;
+  }
+  .error {
+    border: 1px solid #ff4949;
+    box-shadow: 0px 0px 8px rgba(#ff4949, 1);
+  }
   .table {
     padding: 15px 10px;
   }
@@ -124,7 +132,21 @@
     @Action('completePayment') protected completePayment: ActionMethod;
     @Action('deleteOrder') protected deleteOrder: ActionMethod;
     @Action('exitOrder') protected exitOrder: ActionMethod;
-    public remainDate(date: number) {
+    protected currentTime: number = 0;
+    protected updateTimer: any = 0;
+    protected created() {
+      this.updateTimer = setInterval(() => this.updateCurrentTime(), 30000);
+    }
+    protected beforeDestroy() {
+      clearInterval(this.updateTimer);
+    }
+    protected updateCurrentTime(): void {
+      this.currentTime = Date.now();
+    }
+    protected cardTimeOver(date: number) {
+      return date && Math.abs(moment(date).diff(this.currentTime) / 60000) > 90;
+    }
+    protected remainDate(date: number) {
       return date && moment(date).add(90, 'm').format('H:mm');
     }
     @confirmMessage('주문결제')

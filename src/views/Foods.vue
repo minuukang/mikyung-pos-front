@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <section :class="$style.table">
+  <div :class="$style.container">
+    <section :class="$style.table" v-if="tableInfos.length">
       <div :class="$style.card" v-for="(table) in tableInfos">
         <header :class="$style.cardHeader">
           <h3 :class="$style.cardTitle"><v-icon name="list" /> {{ table.orderInfoType === 'TABLE' ? '테이블' : '테이크아웃' }} {{ table.orderInfoNo }}</h3>
@@ -28,6 +28,7 @@
         </footer>
       </div>
     </section>
+    <no-data v-else></no-data>
   </div>
 </template>
 <style>
@@ -85,10 +86,12 @@
   import { Getter, State } from 'vuex-class';
   import { OrderItem, Table } from '../store/types';
   import { Indicator, MessageBox } from 'mint-ui';
+  import NoData from '../components/NoData.vue';
   import api from '@/api/order';
 
   @Component({
     components: {
+      NoData,
     },
   })
   export default class Order extends Vue {
