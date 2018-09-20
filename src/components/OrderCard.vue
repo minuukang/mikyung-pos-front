@@ -9,7 +9,7 @@
       </div>
     </header>
     <div :class="$style.cardContainer">
-      <mt-cell v-for="item in order.orderProducts" :title="item.product.productName" :label="`${item.productCount}개 / ${item.product.salesAmount}원`">
+      <mt-cell v-for="item in order.orderProducts" :key="item.orderProductId" :title="item.product.productName" :label="`${item.productCount}개 / ${item.product.salesAmount}원`">
         <template v-if="!order.orderPaymentYn">
           결제대기중
         </template>

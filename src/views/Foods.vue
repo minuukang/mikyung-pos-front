@@ -1,7 +1,7 @@
 <template>
   <div :class="$style.container">
     <section :class="$style.table" v-if="tableInfos.length">
-      <div :class="$style.card" v-for="(table) in tableInfos">
+      <div :class="$style.card" v-for="(table) in tableInfos" :key="table.orderInfoId">
         <header :class="$style.cardHeader">
           <h3 :class="$style.cardTitle"><v-icon name="list" /> {{ table.orderInfoType === 'TABLE' ? '테이블' : '테이크아웃' }} {{ table.orderInfoNo }}</h3>
         </header>
@@ -9,6 +9,7 @@
           <template v-for="item in table.orders">
             <mt-cell
               v-for="orderItem in item.orderProducts"
+              :key="orderItem.orderProductId"
               v-if="!orderItem.product.productAutoCookingCompleteYn"
               :class="$style.item"
               :title="orderItem.product.productName"

@@ -1,6 +1,7 @@
 {
   "short_name": "미.경.포.스",
   "name": "2018년 숭실대학교 미디어경영학과 축제 주점 포스앱",
+  "description": "2018년 숭실대학교 미디어경영학과 축제 주점 포스앱을 사용해서 편리하게 계산하자!",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#26a2ff",

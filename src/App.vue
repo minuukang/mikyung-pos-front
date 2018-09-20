@@ -59,6 +59,8 @@
     protected loadProductGroups: ActionMethod;
     @Action('loadTables')
     protected loadTables: ActionMethod;
+    @Action('loadBankImage')
+    protected loadBankImage: ActionMethod;
     @Action('loadUserName')
     protected loadUserName: ActionMethod;
     @Action('setUserName')
@@ -77,7 +79,10 @@
       if (this.userName) {
         this.$root.$on('refresh', this.refresh);
         Indicator.open();
-        await this.loadProductGroups();
+        await Promise.all([
+          this.loadProductGroups(),
+          this.loadBankImage(),
+        ]);
         Indicator.close();
         this.refresh();
       } else {

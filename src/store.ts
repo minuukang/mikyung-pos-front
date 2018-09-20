@@ -12,6 +12,7 @@ interface RootState {
   productGroups: ProductGroup[];
   orderInfos: Table[];
   userName: string;
+  bankImage: string | null;
 }
 
 function roleMatch(role: string, ...matchRole: string[]): boolean {
@@ -23,6 +24,7 @@ export default new Vuex.Store<RootState>({
     productGroups: [],
     orderInfos: [],
     userName: '',
+    bankImage: null,
   },
   getters: {
     userRole(state) {
@@ -64,11 +66,11 @@ export default new Vuex.Store<RootState>({
     replaceTables(state, payload: Table[]) {
       state.orderInfos = payload;
     },
-    addTable(state, payload: Table) {
-      state.orderInfos.push(payload);
-    },
     setUserName(state, payload: string) {
       state.userName = payload;
+    },
+    setBankImage(state, payload: string) {
+      state.bankImage = payload;
     },
   },
   actions: {
@@ -130,6 +132,13 @@ export default new Vuex.Store<RootState>({
     logout(context) {
       localStorage.setItem('posUserName', '');
       context.commit('setUserName', '');
+    },
+    loadBankImage(context) {
+      const image = new Image();
+      image.addEventListener('load', () => {
+        context.commit('setBankImage', image.src);
+      });
+      image.src = require('./assets/card.png');
     },
   },
 });

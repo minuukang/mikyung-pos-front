@@ -1,7 +1,7 @@
 <template>
   <div :class="$style.container">
     <template v-if="availableOrders.length">
-      <order-card v-for="order in availableOrders" :order="order" :table="order.table"></order-card>
+      <order-card v-for="order in availableOrders" :key="order.orderId" :order="order" :table="order.table"></order-card>
     </template>
     <no-data v-else></no-data>
   </div>
