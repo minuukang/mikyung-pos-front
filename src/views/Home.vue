@@ -31,8 +31,8 @@
     left: 0;
     top: 0;
     &Button {
-      background-color: #dfdfdf;
-      color: #767676;
+      background-color: #9dc3da !important;
+      color: #fff !important;
     }
   }
   .logout {

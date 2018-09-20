@@ -79,10 +79,19 @@
       if (this.userName) {
         this.$root.$on('refresh', this.refresh);
         Indicator.open();
-        await Promise.all([
-          this.loadProductGroups(),
-          this.loadBankImage(),
-        ]);
+        try {
+          await Promise.race([
+            Promise.all([
+              this.loadProductGroups(),
+              this.loadBankImage(),
+            ]),
+            new Promise((resolve, reject) => {
+              setTimeout(reject, REFRESH_TIME);
+            }),
+          ]);
+        } catch (e) {
+          location.reload();
+        }
         Indicator.close();
         this.refresh();
       } else {
