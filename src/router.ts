@@ -6,6 +6,7 @@ import Payment from './views/Payment.vue';
 import Takeout from './views/Takeout.vue';
 import Foods from './views/Foods.vue';
 import Status from './views/Status.vue';
+import Login from './views/Login.vue';
 import NoData from './components/NoData.vue';
 
 Vue.use(Router);
@@ -17,6 +18,11 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Home,
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login,
     },
     {
       path: '/order',

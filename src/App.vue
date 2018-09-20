@@ -1,6 +1,6 @@
 <template>
   <div id="app" :class="$style.container">
-    <header class="mint-header">
+    <header class="mint-header" v-if="userName">
       <div class="mint-header-button is-left">
         <mt-button slot="left" @click="$router.back()" icon="back"></mt-button>
       </div>
@@ -9,7 +9,11 @@
         <v-icon scale="1.3" name="sync" @click.native="refresh"></v-icon>
       </div>
     </header>
-    <router-view :class="$style.main" />
+    <div :class="$style.main">
+      <transition enter-active-class="animated fadeIn faster" leave-active-class="animated fadeOut faster">
+        <router-view :class="$style.content" />
+      </transition>
+    </div>
   </div>
 </template>
 <style lang="scss" src="./style.scss"></style>
@@ -26,12 +30,20 @@
   }
   .main {
     flex: 1;
-    overflow-y: scroll;
+    position: relative;
+  }
+  .content {
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
   }
 </style>
 <script lang="ts">
-  import { Component, Vue } from 'vue-property-decorator';
+  import { Component, Vue, Watch } from 'vue-property-decorator';
   import { Action, State } from 'vuex-class';
   import { ActionMethod } from 'vuex';
   import { Indicator, MessageBox } from 'mint-ui';
@@ -54,19 +66,23 @@
     @State('userName')
     protected userName: string;
     private refreshInterval: any = 0;
-    protected async created() {
-      this.$root.$on('refresh', this.refresh);
-      Indicator.open();
-      await Promise.all([
-        this.loadProductGroups(),
-        this.loadUserName(),
-      ]);
-      Indicator.close();
+    @Watch('userName')
+    protected onChangeUserName() {
       if (!this.userName) {
-        this.$router.push({ name: 'home' });
-        await this.showUserNamePrompt();
+        this.$router.replace({ name: 'login' });
       }
-      this.refresh();
+    }
+    protected async created() {
+      await this.loadUserName();
+      if (this.userName) {
+        this.$root.$on('refresh', this.refresh);
+        Indicator.open();
+        await this.loadProductGroups();
+        Indicator.close();
+        this.refresh();
+      } else {
+        this.onChangeUserName();
+      }
     }
     protected async refresh(showIndicator = true) {
       try {

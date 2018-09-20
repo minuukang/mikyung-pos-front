@@ -77,10 +77,30 @@
   import FoodItem from '../components/FoodItem.vue';
   import { Indicator, MessageBox } from 'mint-ui';
   import { confirmMessage } from '../helper/confirm';
+  import { numberFormat } from '@/helper/number-format';
 
   export interface ProductEa {
     productId: number;
     ea: number;
+  }
+
+  async function showDescriptionMessage(this: Payment) {
+    const paymentProductMessage = this.productEa.filter(({ea}) => ea > 0).map(({productId, ea}) => {
+      return {
+        product: this.products.find((product: Product) => product.productId === productId) as Product,
+        ea,
+      };
+    }).map(({product, ea}) => {
+      return `${product.productName} : ${ea}개`;
+    }).join('<br>');
+    await MessageBox({
+      $type: 'confirm',
+      title: '주문 내역 확인',
+      message: `${paymentProductMessage}<br>(받은 금액 : ${numberFormat(this.receiveAmount || this.totalPrice)}원)<br>주문 내용이 맞으십니까?`,
+      showCancelButton: true,
+      confirmButtonText: '확인',
+      cancelButtonText: '취소',
+    });
   }
 
   @Component({
@@ -88,7 +108,7 @@
       FoodItem,
     },
   })
-  export default class Order extends Vue {
+  export default class Payment extends Vue {
     @State('productGroups')
     protected productGroups: ProductGroup[];
     @State('orderInfos')
@@ -106,7 +126,7 @@
     get orderInfoId() {
       return Number(this.$route.params.orderInfoId);
     }
-    @confirmMessage('주문', { name: 'order' })
+    @confirmMessage('주문', { name: 'order' }, showDescriptionMessage)
     protected async doAction() {
       if (!this.orderProducts.length) {
         throw new Error('1개 이상의 상품을 담아주세요!');

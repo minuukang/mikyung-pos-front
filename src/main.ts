@@ -6,13 +6,11 @@ import Mint from 'mint-ui';
 import 'mint-ui/lib/style.css';
 import 'vue-awesome/icons';
 import Icon from 'vue-awesome/components/Icon.vue';
-import numeral from 'numeral';
+import { numberFormat } from '@/helper/number-format';
 
 Vue.use(Mint);
 Vue.component('v-icon', Icon);
-Vue.filter('numberFormat', (value: number) => {
-  return numeral(value).format('0,0');
-});
+Vue.filter('numberFormat', numberFormat);
 
 Vue.config.productionTip = false;
 

@@ -15,11 +15,13 @@
         </template>
         <template v-else>
           <template v-if="!item.product.productAutoCookingCompleteYn">
-            <span v-if="item.orderProductStatus === 'ORDER_COMPLETE'"><v-icon name="check-circle" /> 주문완료</span>
-            <span v-else-if="item.orderProductStatus === 'COOK_ING'"><v-icon name="fire" /> 요리중</span>
-            <span :class="$style.success" v-else-if="item.orderProductStatus === 'COOK_END'"><v-icon name="exclamation-circle" /> 요리완료</span>
+            <transition enter-active-class="animated bounceIn" leave-active-class="animated bounceOut">
+              <span :class="$style.status" v-if="item.orderProductStatus === 'ORDER_COMPLETE'"><v-icon name="check-circle" /> 주문완료</span>
+              <span :class="[$style.status, $style.fire]" v-else-if="item.orderProductStatus === 'COOK_ING'"><v-icon name="fire" /> 요리중</span>
+              <span :class="[$style.status, $style.success]" v-else-if="item.orderProductStatus === 'COOK_END'"><v-icon name="exclamation-circle" /> 요리완료</span>
+            </transition>
           </template>
-          <span v-else>서빙완료</span>
+          <span :class="$style.status" v-else>서빙완료</span>
         </template>
       </mt-cell>
     </div>
@@ -48,9 +50,28 @@
   </div>
 </template>
 <style lang="scss" module>
+  .status {
+    display: block;
+    position: relative;
+    animation-duration: 300ms;
+  }
   .success {
-    color: #ff4949;
+    color: #26a2ff;
     font-weight: bold;
+  }
+  @keyframes zomming {
+    from {
+      transform: scale(1, 1);
+    }
+    to {
+      transform: scale(1.2, 1.2);
+    }
+  }
+  .fire {
+    color: #ff4949;
+    position: relative;
+    display: block;
+    animation: zomming linear 300ms infinite alternate;
   }
   .price {
     background-color: #f2f2f2;

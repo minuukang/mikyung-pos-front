@@ -1,10 +1,21 @@
 import { Indicator, MessageBox } from 'mint-ui';
 import Vue from 'vue';
 
-export function confirmMessage(title: string, locate?: any) {
+function errorThrow(timeout: number) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error('오류가 발생하였습니다! 관리자에게 문의해주세요'));
+    }, timeout);
+  });
+}
+
+export function confirmMessage(title: string, locate?: any, beforeCallback?: () => Promise<void>) {
   return function confirmMessageWrapper(target: any, key: string, descriptor: PropertyDescriptor) {
     const fn: () => void = descriptor.value;
     descriptor.value = async function confirmMessageAction(this: Vue, ...args: any[]) {
+      if (beforeCallback) {
+        await beforeCallback.call(this);
+      }
       await MessageBox({
         $type: 'confirm',
         title: '안내',
@@ -15,7 +26,10 @@ export function confirmMessage(title: string, locate?: any) {
       });
       try {
         Indicator.open(`${title}중...`);
-        await fn.apply(this, args);
+        await Promise.race([
+          fn.apply(this, args),
+          errorThrow(10000),
+        ]);
         Indicator.close();
         await MessageBox({
           title: '안내',

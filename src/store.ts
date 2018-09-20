@@ -116,16 +116,20 @@ export default new Vuex.Store<RootState>({
       return orderApi.deleteOrder(orderId);
     },
     loadUserName(context) {
-      const userName = sessionStorage.getItem('posUserName') || '';
+      const userName = localStorage.getItem('posUserName') || '';
       return userName && context.dispatch('setUserName', userName);
     },
     async setUserName(context, payload: string) {
       if (users.some((user) => user.name === payload)) {
-        sessionStorage.setItem('posUserName', payload);
+        localStorage.setItem('posUserName', payload);
         context.commit('setUserName', payload);
       } else {
         throw new Error('미경이 아니시네요!');
       }
+    },
+    logout(context) {
+      localStorage.setItem('posUserName', '');
+      context.commit('setUserName', '');
     },
   },
 });

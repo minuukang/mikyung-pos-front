@@ -16,7 +16,7 @@
             >
               <mt-button @click="changeStatus(item.orderId, orderItem.product.productId)" size="small" v-if="orderItem.orderProductStatus === 'ORDER_COMPLETE'">
                 <v-icon name="cookie" /> 요리 시작하기</mt-button>
-              <mt-button @click="changeStatus(item.orderId, orderItem.product.productId)" size="small" v-else-if="orderItem.orderProductStatus === 'COOK_ING'">
+              <mt-button @click="changeStatus(item.orderId, orderItem.product.productId)" size="small" type="danger" v-else-if="orderItem.orderProductStatus === 'COOK_ING'">
                 <v-icon name="fire" /> 요리 종료하기</mt-button>
               <span :class="$style.statusSuccess" v-else>요리완료</span>
             </mt-cell>
